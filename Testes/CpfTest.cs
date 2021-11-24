@@ -1,5 +1,4 @@
 using ECommerceApp.ValueObject;
-using System;
 using Xunit;
 
 namespace Testes
