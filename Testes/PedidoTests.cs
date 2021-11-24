@@ -38,11 +38,27 @@ namespace Testes
         }
 
         [Fact]
+        public void AdicionarItemAoPedido_AdicionarItemPedidoStatusRejeitado_NaoDeveAdicionarItem()
+        {
+            var pedido = CriarPedidoRejeitado();
+            pedido.AdicionarItemAoPedido(new Item("Livro DDD", VALOR_DO_ITEM, QUANTIDADE_ITEM));
+            pedido.Itens.Count().Should().Be(0);
+        }
+
+        [Fact]
         public void AdicionarCupomDeDescontoAoPedido_AplicarDesconto_DeveAplicarODesconto()
         {
             var pedido = CriarPedidoComItens();
             pedido.AdicionarCupomDeDesconto(10);
             pedido.ValorTotal.Should().Be(27);
+        }
+
+        [Fact]
+        public void AdicionarCupomDeDescontoAoPedido_AdicionarCupomPedidoStatusRejeitado_NaoDeveAdicionarCupom()
+        {
+            var pedido = CriarPedidoRejeitado();
+            pedido.AdicionarCupomDeDesconto(10);
+            pedido.PercentualCupomDesconto.Should().Be(0);
         }
 
         [Fact]

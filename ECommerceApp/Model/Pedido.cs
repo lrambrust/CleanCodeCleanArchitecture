@@ -24,12 +24,16 @@ namespace ECommerceApp.Model
 
         public void AdicionarItemAoPedido(Item item)
         {
+            if (Status.Equals(StatusPedido.Rejeitado)) return;
+
             _itens.Add(item);
             ValorTotal += item.Valor;
         }
 
         public void AdicionarCupomDeDesconto(double cupom)
         {
+            if (Status.Equals(StatusPedido.Rejeitado)) return;
+
             PercentualCupomDesconto = cupom;
             AplicarPercentualDeDesconto();
         }
