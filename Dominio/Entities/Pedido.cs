@@ -1,8 +1,8 @@
-﻿using ECommerceApp.Enum;
-using ECommerceApp.ValueObject;
+﻿using ECommerceApp.Domain.Enum;
+using ECommerceApp.Domain.ValueObject;
 using System.Collections.Generic;
 
-namespace ECommerceApp.Model
+namespace ECommerceApp.Domain.Entities
 {
     public class Pedido
     {

@@ -1,4 +1,4 @@
-using ECommerceApp.ValueObject;
+using ECommerceApp.Domain.ValueObject;
 using Xunit;
 
 namespace Testes

@@ -1,6 +1,6 @@
-﻿using ECommerceApp.Enum;
-using ECommerceApp.Model;
-using ECommerceApp.ValueObject;
+﻿using ECommerceApp.Domain.Entities;
+using ECommerceApp.Domain.Enum;
+using ECommerceApp.Domain.ValueObject;
 using FluentAssertions;
 using System.Linq;
 using Xunit;

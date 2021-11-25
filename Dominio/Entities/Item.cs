@@ -1,4 +1,4 @@
-﻿namespace ECommerceApp.Model
+﻿namespace ECommerceApp.Domain.Entities
 {
     public class Item
     {

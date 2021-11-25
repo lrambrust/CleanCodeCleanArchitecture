@@ -1,5 +1,5 @@
 ﻿
-namespace ECommerceApp.Enum
+namespace ECommerceApp.Domain.Enum
 {
     public enum StatusPedido
     {

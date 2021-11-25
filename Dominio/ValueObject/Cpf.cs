@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace ECommerceApp.ValueObject
+namespace ECommerceApp.Domain.ValueObject
 {
     public class Cpf
     {
