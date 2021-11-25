@@ -1,4 +1,6 @@
-﻿namespace ECommerceApp.ValueObject
+﻿using System.Text.RegularExpressions;
+
+namespace ECommerceApp.ValueObject
 {
     public class Cpf
     {
@@ -29,8 +31,7 @@
             string digito;
             int soma;
             int resto;
-            cpf = cpf.Trim();
-            cpf = cpf.Replace(".", "").Replace("-", "");
+            cpf = Regex.Replace(cpf, "[\\D]", "");
             numeroCpfSemDigito = cpf.Substring(0, 9);
             soma = 0;
 
