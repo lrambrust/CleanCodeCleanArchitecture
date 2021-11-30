@@ -1,72 +1,39 @@
+using ECommerceApp.Domain.Exceptions;
 using ECommerceApp.Domain.ValueObject;
+using FluentAssertions;
 using Xunit;
 
 namespace Testes
 {
     public class CpfTest
     {
+        private const string MENSAGEM_CPFINVALIDOEXCEPTION = "CPF Inválido";
+
         [Fact]
-        public void NovoCpf_CpfValido_DeveRetornarErro()
+        public void NovoCpf_CpfValido_DeveRetornarCpf()
         {
             var cpf = new Cpf("35969412880");
-
-            Assert.True(cpf.CpfValido);
+            cpf.NumeroCpf.Should().Be("35969412880");
         }
 
         [Fact]
-        public void NovoCpf_CpfValidoComCaracteres_DeveRetornarErro()
+        public void NovoCpf_CpfValidoComCaracteres_DeveRetornarCpf()
         {
             var cpf = new Cpf("359.694.128-80");
-
-            Assert.True(cpf.CpfValido);
+            cpf.NumeroCpf.Should().Be("35969412880");
         }
 
-        [Fact]
-        public void NovoCpf_CpfInvalido_DeveRetornarErro()
+        [Theory]
+        [InlineData("35969412888")]
+        [InlineData("35969412880105")]
+        [InlineData("359.694.128-88")]
+        [InlineData("111.111.111-11")]
+        [InlineData(null)]
+        [InlineData("")]
+        public void NovoCpf_CpfInvalido_DeveRetornarErro(string cpf)
         {
-            var cpf = new Cpf("35969412888");
-
-            Assert.False(cpf.CpfValido);
-        }
-        
-        [Fact]
-        public void NovoCpf_CpfTamanhoInvalido_DeveRetornarFalso()
-        {
-            var cpf = new Cpf("35969412880105");
-
-            Assert.False(cpf.CpfValido);
-        }
-
-        [Fact]
-        public void NovoCpf_CpfInvalidoComCaracteres_DeveRetornarFalso()
-        {
-            var cpf = new Cpf("359.694.128-88");
-
-            Assert.False(cpf.CpfValido);
-        }
-
-        [Fact]
-        public void NovoCpf_CpfNull_DeveRetornarFalso()
-        {
-            var cpf = new Cpf(null);
-
-            Assert.False(cpf.CpfValido);
-        }
-
-        [Fact]
-        public void NovoCpf_CpfVazio_DeveRetornarFalso()
-        {
-            var cpf = new Cpf("");
-
-            Assert.False(cpf.CpfValido);
-        }
-
-        [Fact]
-        public void NovoCpf_CpfStringEmpty_DeveRetornarFalso()
-        {
-            var cpf = new Cpf(string.Empty);
-
-            Assert.False(cpf.CpfValido);
+            var mensagemCpfInvalidoException = Assert.Throws<CpfInvalidoException>(() => new Cpf(cpf));
+            mensagemCpfInvalidoException.Message.Should().Be(MENSAGEM_CPFINVALIDOEXCEPTION);
         }
     }
 }

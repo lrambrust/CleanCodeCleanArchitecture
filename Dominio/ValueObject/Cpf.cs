@@ -1,19 +1,23 @@
-﻿using System.Text.RegularExpressions;
+﻿using ECommerceApp.Domain.Exceptions;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace ECommerceApp.Domain.ValueObject
 {
     public class Cpf
     {
         public string NumeroCpf { get; }
-        public bool CpfValido { get; }
 
         public Cpf(string cpf)
         {
-            NumeroCpf = cpf;
-            CpfValido = ValidarCpf(cpf);
+            if (!ValidarCpf(cpf))
+            {
+                throw new CpfInvalidoException();
+            }
+            NumeroCpf = RetornarSomenteNumerosDoCpf(cpf);
         }
 
-        public bool ValidarCpf(string cpf)
+        private bool ValidarCpf(string cpf)
         {
             if (string.IsNullOrEmpty(cpf))
             {
@@ -25,12 +29,17 @@ namespace ECommerceApp.Domain.ValueObject
                 return false;
             }
 
+            cpf = RetornarSomenteNumerosDoCpf(cpf);
+            if (CpfPossuiTodosNumerosIguais(cpf))
+            {
+                return false;
+            }
+
             int[] primeiroMultiplicador = new int[9] { 10, 9, 8, 7, 6, 5, 4, 3, 2 };
             int[] segundoMultiplicador = new int[10] { 11, 10, 9, 8, 7, 6, 5, 4, 3, 2 };
             string numeroCpfSemDigito;
             string digito;
             int resto;
-            cpf = Regex.Replace(cpf, "[\\D]", "");
             numeroCpfSemDigito = cpf.Substring(0, 9);
             resto = CalculoComMultiplicador(primeiroMultiplicador, numeroCpfSemDigito);
             digito = resto.ToString();
@@ -39,6 +48,20 @@ namespace ECommerceApp.Domain.ValueObject
             digito = digito + resto.ToString();
 
             return cpf.EndsWith(digito);
+        }
+        private bool ValidarTamanhoDaString(string cpf)
+        {
+            return cpf.Length < 11 || cpf.Length > 14;
+        }
+
+        private static string RetornarSomenteNumerosDoCpf(string cpf)
+        {
+            return Regex.Replace(cpf, "[\\D]", "");
+        }
+
+        private bool CpfPossuiTodosNumerosIguais(string cpf)
+        {
+            return cpf.All(c => c == cpf[0]);
         }
 
         private static int CalculoComMultiplicador(int[] multiplicador, string numeroCpfSemDigito)
@@ -53,11 +76,6 @@ namespace ECommerceApp.Domain.ValueObject
             resto = soma % 11;
             resto = resto < 2 ? 0 : 11 - resto;
             return resto;
-        }
-
-        private bool ValidarTamanhoDaString(string cpf)
-        {
-            return cpf.Length < 11 || cpf.Length > 14;
         }
     }
 }

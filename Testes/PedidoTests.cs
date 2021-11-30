@@ -1,5 +1,6 @@
 ﻿using ECommerceApp.Domain.Entities;
 using ECommerceApp.Domain.Enum;
+using ECommerceApp.Domain.Exceptions;
 using ECommerceApp.Domain.ValueObject;
 using FluentAssertions;
 using System.Linq;
@@ -13,17 +14,17 @@ namespace Testes
         private const int QUANTIDADE_ITEM = 1;
 
         [Fact]
-        public void NovoPedido_ComCpfInvalido_DeveCriarPedidoComStatusRejeitado()
-        {
-            var pedido = CriarPedidoRejeitado();
-            pedido.Status.Should().Be(StatusPedido.Rejeitado);
-        }
-
-        [Fact]
         public void NovoPedido_ComCpfValido_DeveCriarPedidoComStatusNovoPedido()
         {
             var pedido = CriarNovoPedido();
+            pedido.Cpf.NumeroCpf.Should().Be("35969412880");
             pedido.Status.Should().Be(StatusPedido.NovoPedido);
+        }
+
+        [Fact]
+        public void NovoPedido_ComCpfInvalido_NaoDeveCriarPedido()
+        {
+            Assert.Throws<CpfInvalidoException>(() => new Pedido(new Cpf("111.111.111-11")));
         }
 
         [Fact]
@@ -38,27 +39,11 @@ namespace Testes
         }
 
         [Fact]
-        public void AdicionarItemAoPedido_AdicionarItemPedidoStatusRejeitado_NaoDeveAdicionarItem()
-        {
-            var pedido = CriarPedidoRejeitado();
-            pedido.AdicionarItemAoPedido(new Item("Livro DDD", VALOR_DO_ITEM, QUANTIDADE_ITEM));
-            pedido.Itens.Count().Should().Be(0);
-        }
-
-        [Fact]
         public void AdicionarCupomDeDescontoAoPedido_AplicarDesconto_DeveAplicarODesconto()
         {
             var pedido = CriarPedidoComItens();
             pedido.AdicionarCupomDeDesconto(10);
             pedido.ValorTotal.Should().Be(27);
-        }
-
-        [Fact]
-        public void AdicionarCupomDeDescontoAoPedido_AdicionarCupomPedidoStatusRejeitado_NaoDeveAdicionarCupom()
-        {
-            var pedido = CriarPedidoRejeitado();
-            pedido.AdicionarCupomDeDesconto(10);
-            pedido.PercentualCupomDesconto.Should().Be(0);
         }
 
         [Fact]
@@ -79,12 +64,6 @@ namespace Testes
             pedido.Itens.Count().Should().Be(3);
             pedido.RemoverTodosItens();
             pedido.Itens.Count().Should().Be(0);
-        }
-
-        public Pedido CriarPedidoRejeitado()
-        {
-            var cpf = new Cpf("359.694.128-88");
-            return new Pedido(cpf);
         }
 
         private Pedido CriarNovoPedido()

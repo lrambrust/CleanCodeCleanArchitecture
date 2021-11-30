@@ -19,7 +19,7 @@ namespace ECommerceApp.Domain.Entities
         {
             Cpf = cpf;
             _itens = new List<Item>();
-            Status = CriarStatusInicial(cpf.CpfValido);
+            Status = StatusPedido.NovoPedido;
         }
 
         public void AdicionarItemAoPedido(Item item)
@@ -51,11 +51,6 @@ namespace ECommerceApp.Domain.Entities
         private void AplicarPercentualDeDesconto()
         {
             ValorTotal -= ValorTotal * (PercentualCupomDesconto / 100);
-        }
-
-        private StatusPedido CriarStatusInicial(bool cpfValido)
-        {
-            return cpfValido ? StatusPedido.NovoPedido : StatusPedido.Rejeitado;
         }
     }
 }
