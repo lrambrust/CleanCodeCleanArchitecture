@@ -1,17 +1,33 @@
 ﻿using ECommerceApp.Domain.Entities;
 using ECommerceApp.Domain.Enum;
 using ECommerceApp.Domain.Exceptions;
+using ECommerceApp.Domain.Util;
 using ECommerceApp.Domain.ValueObject;
 using FluentAssertions;
+using System;
 using System.Linq;
 using Xunit;
 
-namespace Testes
+namespace ECommerceApp.Tests
 {
     public class PedidoTests
     {
         private const double VALOR_DO_ITEM = 10;
         private const int QUANTIDADE_ITEM = 1;
+        private DateTime _dataHoje;
+        private DateTime _inicioVigenciaAntiga;
+        private DateTime _inicioVigenciaFutura;
+        private DateTime _fimVigenciaAntiga;
+        private DateTime _fimVigenciaFutura;
+
+        public PedidoTests()
+        {
+            _dataHoje = Clock.Today;
+            _inicioVigenciaAntiga = new DateTime(2000, 01, 01);
+            _inicioVigenciaFutura = DateTime.Now.AddDays(10);
+            _fimVigenciaAntiga = new DateTime(2001, 01, 01);
+            _fimVigenciaFutura = DateTime.Now.AddDays(30);
+        }
 
         [Fact]
         public void NovoPedido_ComCpfValido_DeveCriarPedidoComStatusNovoPedido()
@@ -39,11 +55,19 @@ namespace Testes
         }
 
         [Fact]
-        public void AdicionarCupomDeDescontoAoPedido_AplicarDesconto_DeveAplicarODesconto()
+        public void AdicionarCupomDeDescontoVigenteAoPedido_AplicarDesconto_DeveAplicarODesconto()
         {
             var pedido = CriarPedidoComItens();
-            pedido.AdicionarCupomDeDesconto(10);
-            pedido.ValorTotal.Should().Be(27);
+            pedido.AdicionarCupomDeDesconto(CupomDescontoVigenteNaDataDoPedido());
+            pedido.ValorTotal.Should().Be(25);
+        }
+
+        [Fact]
+        public void AdicionarCupomDeExpiradoDescontoAoPedido_AplicarDesconto_NaoDeveAplicarODesconto()
+        {
+            var pedido = CriarPedidoComItens();
+            pedido.AdicionarCupomDeDesconto(CupomDescontoExpiradoNaDataDoPedido());
+            pedido.ValorTotal.Should().Be(30);
         }
 
         [Fact]
@@ -80,6 +104,18 @@ namespace Testes
             pedido.AdicionarItemAoPedido(new Item("Livro Clean Architecture", 10, 1));
 
             return pedido;
+        }
+
+        private CupomDesconto CupomDescontoVigenteNaDataDoPedido()
+        {
+            return new CupomDesconto("CUPOM5", _inicioVigenciaFutura, _fimVigenciaFutura);
+        }
+
+        private CupomDesconto CupomDescontoExpiradoNaDataDoPedido()
+        {
+            var cupom = new CupomDesconto("CUPOM5", _inicioVigenciaAntiga, _fimVigenciaFutura);
+            cupom.AlterarFimVigencia(_fimVigenciaAntiga);
+            return cupom;
         }
     }
 }

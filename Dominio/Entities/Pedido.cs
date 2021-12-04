@@ -1,5 +1,7 @@
 ﻿using ECommerceApp.Domain.Enum;
+using ECommerceApp.Domain.Util;
 using ECommerceApp.Domain.ValueObject;
+using System;
 using System.Collections.Generic;
 
 namespace ECommerceApp.Domain.Entities
@@ -9,17 +11,18 @@ namespace ECommerceApp.Domain.Entities
         private List<Item> _itens;
 
         public Cpf Cpf { get; }
-        public double PercentualCupomDesconto { get; private set; }
+        public CupomDesconto CupomDesconto { get; private set; }
         public IReadOnlyCollection<Item> Itens => _itens;
-
-        public StatusPedido Status { get; set; }
+        public StatusPedido Status { get; private set; }
         public double ValorTotal { get; private set; }
+        public DateTime DataPedido { get; }
 
         public Pedido(Cpf cpf)
         {
             Cpf = cpf;
             _itens = new List<Item>();
             Status = StatusPedido.NovoPedido;
+            DataPedido = Clock.Now;
         }
 
         public void AdicionarItemAoPedido(Item item)
@@ -30,12 +33,12 @@ namespace ECommerceApp.Domain.Entities
             ValorTotal += item.Valor;
         }
 
-        public void AdicionarCupomDeDesconto(double cupom)
+        public void AdicionarCupomDeDesconto(CupomDesconto cupom)
         {
             if (Status.Equals(StatusPedido.Rejeitado)) return;
 
-            PercentualCupomDesconto = cupom;
-            AplicarPercentualDeDesconto();
+            CupomDesconto = cupom;
+            AplicarDescontoCupom();
         }
 
         public void RemoverItemDoPedido(Item item)
@@ -48,9 +51,13 @@ namespace ECommerceApp.Domain.Entities
             _itens.Clear();
         }
 
-        private void AplicarPercentualDeDesconto()
+        private void AplicarDescontoCupom()
         {
-            ValorTotal -= ValorTotal * (PercentualCupomDesconto / 100);
+            if (!CupomDesconto.CupomAtivo(DataPedido))
+            {
+                return;
+            }
+            ValorTotal -= CupomDesconto.ObterValorDesconto();
         }
     }
 }

@@ -3,7 +3,7 @@ using ECommerceApp.Domain.ValueObject;
 using FluentAssertions;
 using Xunit;
 
-namespace Testes
+namespace ECommerceApp.Tests
 {
     public class CpfTest
     {
