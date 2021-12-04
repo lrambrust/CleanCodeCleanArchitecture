@@ -24,7 +24,7 @@ namespace ECommerceApp.Domain.Services
                 return VALOR_MINIMO_FRETE;
             }
 
-            return Math.Truncate(100 * valorFrete) / 100;  //Math.Round(valorFrete, 2);
+            return Math.Truncate(100 * valorFrete) / 100;
         }
     }
 }
