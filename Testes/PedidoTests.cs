@@ -47,9 +47,9 @@ namespace ECommerceApp.Tests
         public void AdicionarItemAoPedido_AdicionarItens_DeveAdicionarOsItens()
         {
             var pedido = CriarNovoPedido();
-            pedido.AdicionarItemAoPedido(new Item("Livro DDD", VALOR_DO_ITEM, QUANTIDADE_ITEM));
-            pedido.AdicionarItemAoPedido(new Item("Livro Clean Code", VALOR_DO_ITEM, QUANTIDADE_ITEM));
-            pedido.AdicionarItemAoPedido(new Item("Livro Clean Architecture", VALOR_DO_ITEM, QUANTIDADE_ITEM));
+            pedido.AdicionarItemAoPedido(new Produto("Livro DDD", VALOR_DO_ITEM, QUANTIDADE_ITEM));
+            pedido.AdicionarItemAoPedido(new Produto("Livro Clean Code", VALOR_DO_ITEM, QUANTIDADE_ITEM));
+            pedido.AdicionarItemAoPedido(new Produto("Livro Clean Architecture", VALOR_DO_ITEM, QUANTIDADE_ITEM));
             pedido.Itens.Count().Should().Be(3);
             pedido.ValorTotal.Should().Be(30);
         }
@@ -73,7 +73,7 @@ namespace ECommerceApp.Tests
         [Fact]
         public void RemoverItemPedido_RemoverItemPedido_DeveRemoverOItemDoPedido()
         {
-            var item = new Item("Livro DDD", VALOR_DO_ITEM, QUANTIDADE_ITEM);
+            var item = new Produto("Livro DDD", VALOR_DO_ITEM, QUANTIDADE_ITEM);
             var pedido = CriarNovoPedido();
             pedido.AdicionarItemAoPedido(item);
             pedido.Itens.Count().Should().Be(1);
@@ -99,16 +99,16 @@ namespace ECommerceApp.Tests
         private Pedido CriarPedidoComItens()
         {
             var pedido = CriarNovoPedido();
-            pedido.AdicionarItemAoPedido(new Item("Livro DDD", 10, 1));
-            pedido.AdicionarItemAoPedido(new Item("Livro Clean Code", 10, 1));
-            pedido.AdicionarItemAoPedido(new Item("Livro Clean Architecture", 10, 1));
+            pedido.AdicionarItemAoPedido(new Produto("Livro DDD", 10, 1));
+            pedido.AdicionarItemAoPedido(new Produto("Livro Clean Code", 10, 1));
+            pedido.AdicionarItemAoPedido(new Produto("Livro Clean Architecture", 10, 1));
 
             return pedido;
         }
 
         private CupomDesconto CupomDescontoVigenteNaDataDoPedido()
         {
-            return new CupomDesconto("CUPOM5", _inicioVigenciaFutura, _fimVigenciaFutura);
+            return new CupomDesconto("CUPOM5", _inicioVigenciaAntiga, _fimVigenciaFutura);
         }
 
         private CupomDesconto CupomDescontoExpiradoNaDataDoPedido()

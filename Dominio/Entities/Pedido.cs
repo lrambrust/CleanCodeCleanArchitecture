@@ -8,11 +8,11 @@ namespace ECommerceApp.Domain.Entities
 {
     public class Pedido
     {
-        private List<Item> _itens;
+        private List<Produto> _itens;
 
         public Cpf Cpf { get; }
         public CupomDesconto CupomDesconto { get; private set; }
-        public IReadOnlyCollection<Item> Itens => _itens;
+        public IReadOnlyCollection<Produto> Itens => _itens;
         public StatusPedido Status { get; private set; }
         public double ValorTotal { get; private set; }
         public DateTime DataPedido { get; }
@@ -20,12 +20,12 @@ namespace ECommerceApp.Domain.Entities
         public Pedido(Cpf cpf)
         {
             Cpf = cpf;
-            _itens = new List<Item>();
+            _itens = new List<Produto>();
             Status = StatusPedido.NovoPedido;
             DataPedido = Clock.Now;
         }
 
-        public void AdicionarItemAoPedido(Item item)
+        public void AdicionarItemAoPedido(Produto item)
         {
             if (Status.Equals(StatusPedido.Rejeitado)) return;
 
@@ -41,7 +41,7 @@ namespace ECommerceApp.Domain.Entities
             AplicarDescontoCupom();
         }
 
-        public void RemoverItemDoPedido(Item item)
+        public void RemoverItemDoPedido(Produto item)
         {
             _itens.Remove(item);
         }
