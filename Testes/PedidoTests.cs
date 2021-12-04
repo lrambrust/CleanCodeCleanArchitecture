@@ -1,6 +1,7 @@
 ﻿using ECommerceApp.Domain.Entities;
 using ECommerceApp.Domain.Enum;
 using ECommerceApp.Domain.Exceptions;
+using ECommerceApp.Domain.Services;
 using ECommerceApp.Domain.Util;
 using ECommerceApp.Domain.ValueObject;
 using FluentAssertions;
@@ -47,47 +48,69 @@ namespace ECommerceApp.Tests
         public void AdicionarItemAoPedido_AdicionarItens_DeveAdicionarOsItens()
         {
             var pedido = CriarNovoPedido();
-            pedido.AdicionarItemAoPedido(new Produto("Livro DDD", VALOR_DO_ITEM, QUANTIDADE_ITEM));
-            pedido.AdicionarItemAoPedido(new Produto("Livro Clean Code", VALOR_DO_ITEM, QUANTIDADE_ITEM));
-            pedido.AdicionarItemAoPedido(new Produto("Livro Clean Architecture", VALOR_DO_ITEM, QUANTIDADE_ITEM));
-            pedido.Itens.Count().Should().Be(3);
-            pedido.ValorTotal.Should().Be(30);
+            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(new Produto("Livro DDD", VALOR_DO_ITEM), QUANTIDADE_ITEM));
+            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(new Produto("Livro Clean Code", VALOR_DO_ITEM), QUANTIDADE_ITEM));
+            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(new Produto("Livro Clean Architecture", VALOR_DO_ITEM), QUANTIDADE_ITEM));
+            pedido.Produtos.Count().Should().Be(3);
+            pedido.Subtotal.Should().Be(30);
         }
 
         [Fact]
         public void AdicionarCupomDeDescontoVigenteAoPedido_AplicarDesconto_DeveAplicarODesconto()
         {
-            var pedido = CriarPedidoComItens();
+            var pedido = CriarPedidoComProtudos();
             pedido.AdicionarCupomDeDesconto(CupomDescontoVigenteNaDataDoPedido());
-            pedido.ValorTotal.Should().Be(25);
+            pedido.Subtotal.Should().Be(25);
         }
 
         [Fact]
         public void AdicionarCupomDeExpiradoDescontoAoPedido_AplicarDesconto_NaoDeveAplicarODesconto()
         {
-            var pedido = CriarPedidoComItens();
+            var pedido = CriarPedidoComProtudos();
             pedido.AdicionarCupomDeDesconto(CupomDescontoExpiradoNaDataDoPedido());
-            pedido.ValorTotal.Should().Be(30);
+            pedido.Subtotal.Should().Be(30);
         }
 
         [Fact]
         public void RemoverItemPedido_RemoverItemPedido_DeveRemoverOItemDoPedido()
         {
-            var item = new Produto("Livro DDD", VALOR_DO_ITEM, QUANTIDADE_ITEM);
+            var produto = new ProdutoPedido(new Produto("Livro DDD", VALOR_DO_ITEM), QUANTIDADE_ITEM);
             var pedido = CriarNovoPedido();
-            pedido.AdicionarItemAoPedido(item);
-            pedido.Itens.Count().Should().Be(1);
-            pedido.RemoverItemDoPedido(item);
-            pedido.Itens.Count().Should().Be(0);
+            pedido.AdicionarProdutoAoPedido(produto);
+            pedido.Produtos.Count().Should().Be(1);
+            pedido.RemoverItemDoPedido(produto);
+            pedido.Produtos.Count().Should().Be(0);
         }
 
         [Fact]
         public void ApagarItensCarrinho_DeveRemoverTodosItensDoPedido_ItensDoPedidoDeveSerZero()
         {
-            var pedido = CriarPedidoComItens();
-            pedido.Itens.Count().Should().Be(3);
+            var pedido = CriarPedidoComProtudos();
+            pedido.Produtos.Count().Should().Be(3);
             pedido.RemoverTodosItens();
-            pedido.Itens.Count().Should().Be(0);
+            pedido.Produtos.Count().Should().Be(0);
+        }
+
+        [Fact]
+        public void PedidoComItens_CalcularFreteMaiorQue10_DeveCalcularFrete()
+        {
+            var pedido = CriarPedidoComProtudos();
+            var valorFrete = CalculadoraFreteService.CalcularFrete(pedido.Produtos);
+            pedido.ValorDoFrete(valorFrete);
+            pedido.ValorFrete.Should().Be(439.99);
+        }
+
+        [Fact]
+        public void PedidoComItens_CalcularFreteMenorQue10_DeveRetornarFreteMinimo()
+        {
+            var camera = new Produto("Camera", VALOR_DO_ITEM);
+            camera.InformarDimensoesDoProtudo(20, 15, 10);
+            camera.InformarPesoDoProduto(1);
+            var pedido = CriarNovoPedido();
+            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(camera, QUANTIDADE_ITEM));
+            var valorFrete = CalculadoraFreteService.CalcularFrete(pedido.Produtos);
+            pedido.ValorDoFrete(valorFrete);
+            pedido.ValorFrete.Should().Be(10);
         }
 
         private Pedido CriarNovoPedido()
@@ -96,12 +119,21 @@ namespace ECommerceApp.Tests
             return new Pedido(cpf);
         }
 
-        private Pedido CriarPedidoComItens()
+        private Pedido CriarPedidoComProtudos()
         {
+            var camera = new Produto("Camera", VALOR_DO_ITEM);
+            camera.InformarDimensoesDoProtudo(20, 15, 10);
+            camera.InformarPesoDoProduto(1);
+            var guitarra = new Produto("Guitarra", VALOR_DO_ITEM);
+            guitarra.InformarDimensoesDoProtudo(100, 30, 10);
+            guitarra.InformarPesoDoProduto(3);
+            var geladeira = new Produto("Geladeira", VALOR_DO_ITEM);
+            geladeira.InformarDimensoesDoProtudo(200, 100, 50);
+            geladeira.InformarPesoDoProduto(40);
             var pedido = CriarNovoPedido();
-            pedido.AdicionarItemAoPedido(new Produto("Livro DDD", 10, 1));
-            pedido.AdicionarItemAoPedido(new Produto("Livro Clean Code", 10, 1));
-            pedido.AdicionarItemAoPedido(new Produto("Livro Clean Architecture", 10, 1));
+            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(camera, QUANTIDADE_ITEM));
+            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(guitarra, QUANTIDADE_ITEM));
+            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(geladeira, QUANTIDADE_ITEM));
 
             return pedido;
         }

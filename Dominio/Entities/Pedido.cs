@@ -3,61 +3,76 @@ using ECommerceApp.Domain.Util;
 using ECommerceApp.Domain.ValueObject;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace ECommerceApp.Domain.Entities
 {
     public class Pedido
     {
-        private List<Produto> _itens;
+        private List<ProdutoPedido> _produtos;
 
         public Cpf Cpf { get; }
         public CupomDesconto CupomDesconto { get; private set; }
-        public IReadOnlyCollection<Produto> Itens => _itens;
+        public IReadOnlyCollection<ProdutoPedido> Produtos => _produtos;
         public StatusPedido Status { get; private set; }
+        public double Subtotal { get; private set; }
+        public double ValorFrete { get; private set; }
         public double ValorTotal { get; private set; }
         public DateTime DataPedido { get; }
 
         public Pedido(Cpf cpf)
         {
             Cpf = cpf;
-            _itens = new List<Produto>();
+            _produtos = new List<ProdutoPedido>();
             Status = StatusPedido.NovoPedido;
             DataPedido = Clock.Now;
         }
 
-        public void AdicionarItemAoPedido(Produto item)
+        public void AdicionarProdutoAoPedido(ProdutoPedido produto)
         {
             if (Status.Equals(StatusPedido.Rejeitado)) return;
-
-            _itens.Add(item);
-            ValorTotal += item.Valor;
+            _produtos.Add(produto);
+            CalcularSubTotalDoPedido();
         }
 
         public void AdicionarCupomDeDesconto(CupomDesconto cupom)
         {
             if (Status.Equals(StatusPedido.Rejeitado)) return;
-
             CupomDesconto = cupom;
-            AplicarDescontoCupom();
+            CalcularSubTotalDoPedido();
         }
 
-        public void RemoverItemDoPedido(Produto item)
+        public void RemoverItemDoPedido(ProdutoPedido produto)
         {
-            _itens.Remove(item);
+            _produtos.Remove(produto);
+            CalcularSubTotalDoPedido();
         }
 
         public void RemoverTodosItens()
         {
-            _itens.Clear();
+            _produtos.Clear();
+            CalcularSubTotalDoPedido();
         }
 
-        private void AplicarDescontoCupom()
+        private void CalcularSubTotalDoPedido()
         {
-            if (!CupomDesconto.CupomAtivo(DataPedido))
+            Subtotal = _produtos.Sum(p => p.ValorProdutoPedido());
+            if (CupomDesconto == null || !CupomDesconto.CupomAtivo(DataPedido) || Subtotal  == 0)
             {
                 return;
             }
-            ValorTotal -= CupomDesconto.ObterValorDesconto();
+            Subtotal -= CupomDesconto.ObterValorDesconto();
+            CalcularValorTotalDoPedido();
+        }
+
+        public void ValorDoFrete(double valorFrete)
+        {
+            ValorFrete = valorFrete;
+        }
+
+        private void CalcularValorTotalDoPedido()
+        {
+            ValorTotal = Subtotal + ValorFrete;
         }
     }
 }
