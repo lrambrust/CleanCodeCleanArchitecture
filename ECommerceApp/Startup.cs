@@ -1,16 +1,11 @@
+using ECommerceApp.Application.Services;
+using ECommerceApp.Domain.Interfaces.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace ECommerceApp
 {
@@ -26,11 +21,22 @@ namespace ECommerceApp
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-
+            AddServices(services);
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "ECommerceApp", Version = "v1" });
+            });
+
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAllHeaders",
+                      builder =>
+                      {
+                          builder.AllowAnyOrigin()
+                                 .AllowAnyHeader()
+                                 .AllowAnyMethod();
+                      });
             });
         }
 
@@ -49,11 +55,16 @@ namespace ECommerceApp
             app.UseRouting();
 
             app.UseAuthorization();
-
+            app.UseCors("AllowAllHeaders");
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+        }
+
+        private void AddServices(IServiceCollection serviceCollection)
+        {
+            serviceCollection.AddScoped<ICalculoFreteService, CalculoFreteService>();
         }
     }
 }

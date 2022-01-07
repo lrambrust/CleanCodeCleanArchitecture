@@ -1,7 +1,7 @@
-﻿using ECommerceApp.Domain.Entities;
+﻿using ECommerceApp.Application.Services;
+using ECommerceApp.Domain.Entities;
 using ECommerceApp.Domain.Enum;
 using ECommerceApp.Domain.Exceptions;
-using ECommerceApp.Domain.Services;
 using ECommerceApp.Domain.Util;
 using ECommerceApp.Domain.ValueObject;
 using FluentAssertions;
@@ -20,6 +20,7 @@ namespace ECommerceApp.Tests
         private DateTime _inicioVigenciaFutura;
         private DateTime _fimVigenciaAntiga;
         private DateTime _fimVigenciaFutura;
+        private CalculoFreteService calculoFreteService;
 
         public PedidoTests()
         {
@@ -28,29 +29,31 @@ namespace ECommerceApp.Tests
             _inicioVigenciaFutura = DateTime.Now.AddDays(10);
             _fimVigenciaAntiga = new DateTime(2001, 01, 01);
             _fimVigenciaFutura = DateTime.Now.AddDays(30);
+            calculoFreteService = new CalculoFreteService();
         }
 
         [Fact]
         public void NovoPedido_ComCpfValido_DeveCriarPedidoComStatusNovoPedido()
         {
             var pedido = CriarNovoPedido();
-            pedido.Cpf.NumeroCpf.Should().Be("35969412880");
+            pedido.Cpf.Numero.Should().Be("35969412880");
             pedido.Status.Should().Be(StatusPedido.NovoPedido);
+            pedido.CodigoPedido.Should().Be($"{pedido.DataPedido.ToString("yyyy")}{pedido.ID.ToString("D8")}");
         }
 
         [Fact]
         public void NovoPedido_ComCpfInvalido_NaoDeveCriarPedido()
         {
-            Assert.Throws<CpfInvalidoException>(() => new Pedido(new Cpf("111.111.111-11")));
+            Assert.Throws<CpfInvalidoException>(() => new Pedido("111.111.111-11"));
         }
 
         [Fact]
         public void AdicionarItemAoPedido_AdicionarItens_DeveAdicionarOsItens()
         {
             var pedido = CriarNovoPedido();
-            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(new Produto("Livro DDD", VALOR_DO_ITEM), QUANTIDADE_ITEM));
-            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(new Produto("Livro Clean Code", VALOR_DO_ITEM), QUANTIDADE_ITEM));
-            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(new Produto("Livro Clean Architecture", VALOR_DO_ITEM), QUANTIDADE_ITEM));
+            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(pedido.ID, 1, QUANTIDADE_ITEM, VALOR_DO_ITEM));
+            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(pedido.ID, 2, QUANTIDADE_ITEM, VALOR_DO_ITEM));
+            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(pedido.ID, 3, QUANTIDADE_ITEM, VALOR_DO_ITEM));
             pedido.Produtos.Count().Should().Be(3);
             pedido.Subtotal.Should().Be(30);
         }
@@ -74,8 +77,8 @@ namespace ECommerceApp.Tests
         [Fact]
         public void RemoverItemPedido_RemoverItemPedido_DeveRemoverOItemDoPedido()
         {
-            var produto = new ProdutoPedido(new Produto("Livro DDD", VALOR_DO_ITEM), QUANTIDADE_ITEM);
             var pedido = CriarNovoPedido();
+            var produto = new ProdutoPedido(pedido.ID, 1, QUANTIDADE_ITEM, VALOR_DO_ITEM);
             pedido.AdicionarProdutoAoPedido(produto);
             pedido.Produtos.Count().Should().Be(1);
             pedido.RemoverItemDoPedido(produto);
@@ -95,7 +98,7 @@ namespace ECommerceApp.Tests
         public void PedidoComItens_CalcularFreteMaiorQue10_DeveCalcularFrete()
         {
             var pedido = CriarPedidoComProtudos();
-            var valorFrete = CalculadoraFreteService.CalcularFrete(pedido.Produtos);
+            var valorFrete = calculoFreteService.CalcularFrete(pedido.Produtos);
             pedido.ValorDoFrete(valorFrete);
             pedido.ValorFrete.Should().Be(439.99);
         }
@@ -103,20 +106,18 @@ namespace ECommerceApp.Tests
         [Fact]
         public void PedidoComItens_CalcularFreteMenorQue10_DeveRetornarFreteMinimo()
         {
-            var camera = new Produto("Camera", VALOR_DO_ITEM);
-            camera.InformarDimensoesDoProtudo(20, 15, 10);
-            camera.InformarPesoDoProduto(1);
             var pedido = CriarNovoPedido();
-            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(camera, QUANTIDADE_ITEM));
-            var valorFrete = CalculadoraFreteService.CalcularFrete(pedido.Produtos);
+            var produto = new Produto("Produto", VALOR_DO_ITEM);
+            produto.InformarDimensoesDoProtudo(1, 1, 1);
+            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(pedido.ID, 1, QUANTIDADE_ITEM, VALOR_DO_ITEM) { Produto = produto});
+            var valorFrete = calculoFreteService.CalcularFrete(pedido.Produtos);
             pedido.ValorDoFrete(valorFrete);
             pedido.ValorFrete.Should().Be(10);
         }
 
         private Pedido CriarNovoPedido()
         {
-            var cpf = new Cpf("359.694.128-80");
-            return new Pedido(cpf);
+            return new Pedido("359.694.128-80");
         }
 
         private Pedido CriarPedidoComProtudos()
@@ -131,9 +132,9 @@ namespace ECommerceApp.Tests
             geladeira.InformarDimensoesDoProtudo(200, 100, 50);
             geladeira.InformarPesoDoProduto(40);
             var pedido = CriarNovoPedido();
-            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(camera, QUANTIDADE_ITEM));
-            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(guitarra, QUANTIDADE_ITEM));
-            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(geladeira, QUANTIDADE_ITEM));
+            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(pedido.ID, camera.ID, QUANTIDADE_ITEM, VALOR_DO_ITEM) { Produto = camera }); ;
+            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(pedido.ID, guitarra.ID, QUANTIDADE_ITEM, VALOR_DO_ITEM) { Produto = guitarra });
+            pedido.AdicionarProdutoAoPedido(new ProdutoPedido(pedido.ID, geladeira.ID, QUANTIDADE_ITEM, VALOR_DO_ITEM) { Produto = geladeira });
 
             return pedido;
         }

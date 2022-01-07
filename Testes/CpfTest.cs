@@ -13,14 +13,14 @@ namespace ECommerceApp.Tests
         public void NovoCpf_CpfValido_DeveRetornarCpf()
         {
             var cpf = new Cpf("35969412880");
-            cpf.NumeroCpf.Should().Be("35969412880");
+            cpf.Numero.Should().Be("35969412880");
         }
 
         [Fact]
         public void NovoCpf_CpfValidoComCaracteres_DeveRetornarCpf()
         {
             var cpf = new Cpf("359.694.128-80");
-            cpf.NumeroCpf.Should().Be("35969412880");
+            cpf.Numero.Should().Be("35969412880");
         }
 
         [Theory]

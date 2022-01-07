@@ -7,6 +7,7 @@ namespace ECommerceApp.Domain.Entities
 {
     public class CupomDesconto
     {
+        public long ID { get; private set; }
         public string CodigoCupom { get; private set; }
         public DateTime InicioVigencia { get; private set; }
         public DateTime FimVigencia { get; private set; }

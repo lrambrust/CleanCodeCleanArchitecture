@@ -6,7 +6,7 @@ namespace ECommerceApp.Domain.ValueObject
 {
     public class Cpf
     {
-        public string NumeroCpf { get; }
+        public string Numero { get; }
 
         public Cpf(string cpf)
         {
@@ -14,7 +14,7 @@ namespace ECommerceApp.Domain.ValueObject
             {
                 throw new CpfInvalidoException();
             }
-            NumeroCpf = RetornarSomenteNumerosDoCpf(cpf);
+            Numero = RetornarSomenteNumerosDoCpf(cpf);
         }
 
         private bool ValidarCpf(string cpf)

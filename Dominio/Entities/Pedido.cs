@@ -11,6 +11,7 @@ namespace ECommerceApp.Domain.Entities
     {
         private List<ProdutoPedido> _produtos;
 
+        public int ID { get; private set; }
         public Cpf Cpf { get; }
         public CupomDesconto CupomDesconto { get; private set; }
         public IReadOnlyCollection<ProdutoPedido> Produtos => _produtos;
@@ -19,13 +20,20 @@ namespace ECommerceApp.Domain.Entities
         public double ValorFrete { get; private set; }
         public double ValorTotal { get; private set; }
         public DateTime DataPedido { get; }
+        public string CodigoPedido { get; private set; }
 
-        public Pedido(Cpf cpf)
+        public Pedido(string cpf)
         {
-            Cpf = cpf;
+            Cpf = new Cpf(cpf);
             _produtos = new List<ProdutoPedido>();
             Status = StatusPedido.NovoPedido;
             DataPedido = Clock.Now;
+            DefinirCodigoPedido(DataPedido);
+        }
+
+        private void DefinirCodigoPedido(DateTime date)
+        {
+            CodigoPedido = $"{date.ToString("yyyy")}{ID.ToString("D8")}";
         }
 
         public void AdicionarProdutoAoPedido(ProdutoPedido produto)

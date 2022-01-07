@@ -3,13 +3,19 @@ namespace ECommerceApp.Domain.Entities
 {
     public class ProdutoPedido
     {
-        public Produto Produto { get; }
+        public long ID { get; set; }
+        public long PedidoID { get; set; }
+        public int ProdutoID { get; set; }
+        public Produto Produto { get; set; }
+        public double ValorProduto { get; set; }
         public int Quantidade { get; private set; }
 
-        public ProdutoPedido(Produto produto, int quantidade)
+        public ProdutoPedido(int pedidoId, int produtoId, int quantidade, double valorProduto)
         {
-            Produto = produto;
+            PedidoID = pedidoId;
+            ProdutoID = produtoId;
             Quantidade = quantidade;
+            ValorProduto = valorProduto;
         }
 
         public void AlterarQuantidadeDoProduto(int quantidade)
@@ -19,7 +25,7 @@ namespace ECommerceApp.Domain.Entities
 
         public double ValorProdutoPedido()
         {
-            return Produto.Valor * Quantidade;
+            return Quantidade * ValorProduto;
         }
     }
 }
