@@ -3,12 +3,16 @@ namespace ECommerceApp.Domain.Entities
 {
     public class ProdutoPedido
     {
-        public long ID { get; set; }
-        public long PedidoID { get; set; }
+        public long ID { get; private set; }
+        public int PedidoID { get; set; }
         public int ProdutoID { get; set; }
         public Produto Produto { get; set; }
         public double ValorProduto { get; set; }
         public int Quantidade { get; private set; }
+
+        public ProdutoPedido()
+        {
+        }
 
         public ProdutoPedido(int pedidoId, int produtoId, int quantidade, double valorProduto)
         {

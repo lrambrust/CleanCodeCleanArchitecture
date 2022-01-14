@@ -4,7 +4,7 @@ namespace ECommerceApp.Domain.Entities
 {
     public class Produto
     {
-        public int ID { get; set; }
+        public int ID { get; private set; }
         public string Descricao { get; set; }
         public double Valor { get; private set; }
         public double Altura { get; private set; }

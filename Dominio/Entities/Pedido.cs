@@ -22,6 +22,10 @@ namespace ECommerceApp.Domain.Entities
         public DateTime DataPedido { get; }
         public string CodigoPedido { get; private set; }
 
+        public Pedido()
+        {
+        }
+
         public Pedido(string cpf)
         {
             Cpf = new Cpf(cpf);
