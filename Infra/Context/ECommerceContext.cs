@@ -1,12 +1,11 @@
 ﻿using ECommerceApp.Domain.Entities;
-using System.Data.Entity;
-using System.Data.Entity.ModelConfiguration.Conventions;
+using Microsoft.EntityFrameworkCore;
 
 namespace ECommerceApp.Infra.Context
 {
     public class ECommerceContext : DbContext
     {
-        public ECommerceContext() : base("ECommerceContext")
+        public ECommerceContext(DbContextOptions<ECommerceContext> options) : base(options)
         {
         }
 
@@ -15,9 +14,13 @@ namespace ECommerceApp.Infra.Context
         public DbSet<CupomDesconto> CupomDescontos { get; set; }
         public DbSet<ProdutoPedido> ProdutosPedido { get; set; }
 
-        protected override void OnModelCreating(DbModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder builder)
         {
-            modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
+            base.OnModelCreating(builder);
+            builder.Entity<Pedido>().ToTable("Pedido");
+            builder.Entity<Produto>().ToTable("Produto");
+            builder.Entity<CupomDesconto>().ToTable("CupomDesconto");
+            builder.Entity<ProdutoPedido>().ToTable("ProdutoPedido");
         }
     }
 }

@@ -4,11 +4,11 @@ using System.Linq;
 
 namespace ECommerceApp.Infra.Repositories
 {
-    public class ProdutoRepository
+    public class ProdutoRepositoryDB
     {
         private ECommerceContext _context;
 
-        public ProdutoRepository(ECommerceContext context)
+        public ProdutoRepositoryDB(ECommerceContext context)
         {
             _context = context;
         }
